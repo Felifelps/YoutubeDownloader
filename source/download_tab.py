@@ -47,6 +47,8 @@ def download_tab(page: ft.Page):
         page.update()
 
     def download(_):
+        if not url_field.value:
+            return
         download_button.text = "Downloading..."
         download_button.disabled = True
         progress_ring.visible = True

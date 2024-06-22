@@ -6,7 +6,7 @@ from pytube import Playlist, YouTube
 
 class Control:
     @classmethod
-    def download(cls, url, output_dir, is_playlist=False, is_audio=False):
+    def download(cls, url, output_dir, is_audio=False):
         if "list=" in url:
             playlist = Playlist(url)
             output_dir = os.path.join(
@@ -21,6 +21,7 @@ class Control:
                 ).first().download(output_path=output_dir)
         else:
             video = YouTube(url)
+            print(video.streams.all())
             yield video.streams.filter(
                 only_audio=is_audio
             ).first().download(output_path=output_dir)

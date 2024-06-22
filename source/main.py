@@ -21,46 +21,40 @@ def main(page: ft.Page):
 
         page.client_storage.set('download_dir', download_dir)
 
-    main_view = ft.View(
-        route="/",
-        controls=[
-            ft.Row(
+    page.add(
+        ft.Row(
+            alignment=ft.MainAxisAlignment.CENTER,
+            controls=[
+                ft.Icon(ft.icons.VIDEO_LIBRARY, size=40),
+                ft.Text('YoutubeDownloader', size=40),
+            ]
+        ),
+        ft.Container(
+            expand=True,
+            content=ft.Tabs(
+                selected_index=0,
+                scrollable=True,
+                tabs=[
+                    download_tab(page),
+                    settings_tab(page),
+                ],
+            ),
+        ),
+        ft.Container(
+            alignment=ft.alignment.bottom_center,
+            content=ft.Column(
                 alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 controls=[
-                    ft.Icon(ft.icons.VIDEO_LIBRARY, size=40),
-                    ft.Text('YoutubeDownloader', size=40),
-                ]
-            ),
-            ft.Container(
-                expand=True,
-                content=ft.Tabs(
-                    selected_index=0,
-                    tabs=[
-                        download_tab(page),
-                        settings_tab(page),
-                    ],
-                ),
-            ),
-            ft.Container(
-                alignment=ft.alignment.bottom_center,
-                content=ft.Column(
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    controls=[
-                        ft.TextButton(
-                            content=ft.Text(
-                                '@felifelps.dev',
-                                text_align=ft.TextAlign.CENTER,
-                            ),
-                            url="https://www.instagram.com/felifelps.dev/",
+                    ft.TextButton(
+                        content=ft.Text(
+                            '@felifelps.dev',
+                            text_align=ft.TextAlign.CENTER,
                         ),
-                        
-                    ]
-                )
+                        url="https://www.instagram.com/felifelps.dev/",
+                    ),
+                    
+                ]
             )
-        ]
+        )
     )
-
-    page.views.append(main_view)
-
-    page.go('/')
