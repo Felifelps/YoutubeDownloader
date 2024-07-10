@@ -20,12 +20,6 @@ This is a simple Python desktop app to download YouTube videos and playlists!
 
 ## Installation
 
-### Download .exe
-
-If you are on Windows, download the .exe file from the `dist` directory.
-
-### Install the python project
-
 To install this project, follow these steps:
 
 1. If you haven't already, install Python on your machine on [this link](https://python.org).
