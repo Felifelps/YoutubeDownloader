@@ -1,3 +1,4 @@
+# Desktop development dependencies (see pyproject.toml for the mobile build).
 flet==0.28.3
 flet-desktop==0.28.3
 yt-dlp

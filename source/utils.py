@@ -2,11 +2,26 @@ import os
 
 import flet as ft
 
+from .env import is_android
+
 
 def default_download_dir() -> str:
-    """A friendly place to drop files: the user's ``Downloads`` folder (or the
-    home folder as a fallback), inside a ``YoutubeDownloader`` subfolder.
+    """A friendly place to drop files, inside a ``YoutubeDownloader`` subfolder:
+    the shared ``Download`` folder on Android, otherwise the user's
+    ``Downloads`` folder (home folder as a last resort).
     """
+    if is_android():
+        for base in (
+            "/storage/emulated/0",
+            os.environ.get("EXTERNAL_STORAGE", ""),
+            "/sdcard",
+        ):
+            if base and os.path.isdir(base):
+                return os.path.join(base, "Download", "YoutubeDownloader")
+        return os.path.join(
+            os.path.expanduser("~") or "/data", "YoutubeDownloader"
+        )
+
     home = os.path.expanduser("~")
     downloads = os.path.join(home, "Downloads")
     base = downloads if os.path.isdir(downloads) else home

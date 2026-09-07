@@ -1,0 +1,28 @@
+# Configuration for `flet build` (Android / iOS / desktop / web bundles).
+#
+# For local desktop development keep using `pip install -r requirements.txt`
+# (that file also pulls in flet-desktop and a bundled ffmpeg, which are not
+# used on mobile). `flet build` reads the dependency list below instead.
+
+[project]
+name = "youtubedownloader"
+version = "1.0.0"
+description = "Download YouTube videos and playlists"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "Felifelps", email = "felifelps.dev@gmail.com" }]
+dependencies = [
+    "flet==0.28.3",
+    "yt-dlp",
+]
+
+[tool.flet]
+org = "com.felifelps"
+product = "YoutubeDownloader"
+company = "felifelps.dev"
+copyright = "Copyright (C) 2026 felifelps.dev"
+
+[tool.flet.android.permission]
+"android.permission.INTERNET" = true
+"android.permission.WRITE_EXTERNAL_STORAGE" = true
+"android.permission.READ_EXTERNAL_STORAGE" = true

@@ -3,17 +3,57 @@ import platform
 import shutil
 import subprocess
 
-import imageio_ffmpeg
 from yt_dlp import YoutubeDL
 from yt_dlp.utils import sanitize_filename
 
+from .env import is_android
+
+try:
+    import imageio_ffmpeg
+except ImportError:  # not bundled on mobile builds
+    imageio_ffmpeg = None
+
+_ASSETS_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets"
+)
+
+
+def _android_ffmpeg_dir():
+    """On Android there is no ffmpeg unless one is shipped with the app. Look
+    for an arm64 binary at ``assets/ffmpeg`` (or the ``YTDL_FFMPEG`` env var),
+    copy it somewhere executable and return that folder. ``None`` if absent.
+    """
+    for src in (os.environ.get("YTDL_FFMPEG"), os.path.join(_ASSETS_DIR, "ffmpeg")):
+        if not src or not os.path.isfile(src):
+            continue
+        dst_dir = os.path.join(os.getcwd(), ".bin")
+        dst = os.path.join(dst_dir, "ffmpeg")
+        try:
+            os.makedirs(dst_dir, exist_ok=True)
+            if not os.path.exists(dst):
+                shutil.copy2(src, dst)
+                os.chmod(dst, 0o755)
+            return dst_dir
+        except OSError:
+            return None
+    return None
+
 
 def _ffmpeg_dir():
-    """yt-dlp looks for a binary literally named ``ffmpeg``/``ffmpeg.exe`` in
-    the given directory, but ``imageio-ffmpeg`` ships a versioned name. Copy it
-    once into a stable folder and hand that folder to yt-dlp.
+    """Return a folder holding a binary literally named ``ffmpeg``/``ffmpeg.exe``
+    for yt-dlp to use, or ``None`` when no usable ffmpeg is available.
     """
-    src = imageio_ffmpeg.get_ffmpeg_exe()
+    if is_android():
+        return _android_ffmpeg_dir()
+
+    if imageio_ffmpeg is None:
+        return None
+
+    try:
+        src = imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception:
+        return None
+
     name = "ffmpeg.exe" if platform.system() == "Windows" else "ffmpeg"
     dst_dir = os.path.join(
         os.path.expanduser("~"), ".youtubedownloader", "bin"
@@ -28,6 +68,7 @@ def _ffmpeg_dir():
 
 
 FFMPEG_DIR = _ffmpeg_dir()
+HAS_FFMPEG = FFMPEG_DIR is not None
 
 
 class Control:
@@ -35,25 +76,32 @@ class Control:
     def _options(cls, output_dir, is_audio):
         options = {
             "outtmpl": os.path.join(output_dir, "%(title)s.%(ext)s"),
-            "ffmpeg_location": FFMPEG_DIR,
             "ignoreerrors": True,
             "noprogress": True,
             "quiet": True,
             "no_warnings": True,
         }
 
-        if is_audio:
-            options["format"] = "bestaudio/best"
-            options["postprocessors"] = [
-                {
-                    "key": "FFmpegExtractAudio",
-                    "preferredcodec": "mp3",
-                    "preferredquality": "192",
-                }
-            ]
+        if HAS_FFMPEG:
+            options["ffmpeg_location"] = FFMPEG_DIR
+            if is_audio:
+                options["format"] = "bestaudio/best"
+                options["postprocessors"] = [
+                    {
+                        "key": "FFmpegExtractAudio",
+                        "preferredcodec": "mp3",
+                        "preferredquality": "192",
+                    }
+                ]
+            else:
+                options["format"] = "bestvideo*+bestaudio/best"
+                options["merge_output_format"] = "mp4"
         else:
-            options["format"] = "bestvideo*+bestaudio/best"
-            options["merge_output_format"] = "mp4"
+            # No ffmpeg: grab a single already-muxed stream so nothing needs
+            # merging or transcoding.
+            options["format"] = (
+                "bestaudio[ext=m4a]/bestaudio" if is_audio else "best"
+            )
 
         return options
 
@@ -113,13 +161,15 @@ class Control:
                     continue
 
                 filename = ydl.prepare_filename(result)
-                if is_audio:
+                if is_audio and HAS_FFMPEG:
                     filename = os.path.splitext(filename)[0] + ".mp3"
 
                 yield os.path.basename(filename)
 
     @classmethod
     def open_output_path(cls, output_path):
+        if is_android():
+            return  # no file manager intent from here
         if not output_path or not os.path.exists(output_path):
             return
 
