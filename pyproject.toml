@@ -21,6 +21,11 @@ org = "com.felifelps"
 product = "YoutubeDownloader"
 company = "felifelps.dev"
 copyright = "Copyright (C) 2026 felifelps.dev"
+# Keep the dev virtualenv, git history and build output out of the APK.
+exclude = [".venv", ".git", ".github", ".dart_tool", "__pycache__", "build", ".claude", "dist"]
+
+[tool.flet.app]
+exclude = [".venv", ".git", ".github", ".dart_tool", "__pycache__", "build", ".claude", "dist"]
 
 [tool.flet.android.permission]
 "android.permission.INTERNET" = true
