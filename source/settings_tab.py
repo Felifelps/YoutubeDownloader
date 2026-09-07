@@ -66,7 +66,7 @@ def settings_tab(page: ft.Page):
     return ft.Tab(
         tab_content=ft.Text("Settings"),
         content=ft.Container(
-            padding=ft.padding.all(15),
+            padding=ft.padding.all(8 if is_android() else 15),
             content=ft.Column(controls=controls),
         ),
     )

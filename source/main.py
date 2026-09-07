@@ -3,6 +3,7 @@ import os
 import flet as ft
 
 from .download_tab import download_tab
+from .env import is_android
 from .settings_tab import settings_tab
 from .utils import default_download_dir, storage_get
 
@@ -32,6 +33,10 @@ def main(page: ft.Page):
     page.theme = ft.Theme(color_scheme_seed="red")
     page.auto_scroll = True
 
+    mobile = is_android()
+    if mobile:
+        page.padding = ft.padding.symmetric(horizontal=8, vertical=6)
+
     download_dir = storage_get(page, "download_dir")
     if not download_dir or os.path.normpath(download_dir) == os.path.normpath(
         _LEGACY_DIR
@@ -40,19 +45,31 @@ def main(page: ft.Page):
         os.makedirs(download_dir, exist_ok=True)
         page.client_storage.set("download_dir", download_dir)
 
+    title_size = 22 if mobile else 40
+    icon_size = 24 if mobile else 40
+
+    header = ft.Row(
+        alignment=ft.MainAxisAlignment.CENTER,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        wrap=True,
+        controls=[
+            ft.Icon(ft.Icons.VIDEO_LIBRARY, size=icon_size),
+            ft.Text(
+                "YoutubeDownloader",
+                size=title_size,
+                weight=ft.FontWeight.BOLD,
+                no_wrap=True,
+            ),
+        ],
+    )
+
     page.add(
-        ft.Row(
-            alignment=ft.MainAxisAlignment.CENTER,
-            controls=[
-                ft.Icon(ft.Icons.VIDEO_LIBRARY, size=40),
-                ft.Text("YoutubeDownloader", size=40),
-            ],
-        ),
+        header,
         ft.Container(
             expand=True,
             content=ft.Tabs(
                 selected_index=0,
-                scrollable=True,
+                scrollable=not mobile,
                 tabs=[
                     download_tab(page),
                     settings_tab(page),

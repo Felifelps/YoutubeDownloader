@@ -148,7 +148,7 @@ def download_tab(page: ft.Page):
     return ft.Tab(
         tab_content=ft.Text("Download"),
         content=ft.Container(
-            padding=ft.padding.all(15),
+            padding=ft.padding.all(8 if is_android() else 15),
             content=ft.Column(
                 scroll=ft.ScrollMode.AUTO,
                 controls=[
@@ -158,10 +158,14 @@ def download_tab(page: ft.Page):
                     ),
                     url_field,
                     download_type_field,
-                    ft.Row(controls=[cancel_button, download_button]),
+                    ft.Row(
+                        alignment=ft.MainAxisAlignment.END,
+                        controls=[cancel_button, download_button],
+                    ),
                     ft.Divider(),
                     log_field,
                     ft.Row(
+                        wrap=True,
                         controls=[
                             ft.FilledButton(
                                 "Clear output", on_click=clear_output
