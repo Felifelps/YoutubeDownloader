@@ -4,13 +4,28 @@
 
  # YoutubeDownloader
 
-This is a simple Python desktop app to download YouTube videos and playlists!
+A small Python + Flet app to download YouTube videos and playlists, on desktop
+and Android. The downloading is handled by [yt-dlp](https://github.com/yt-dlp/yt-dlp).
+
+> Personal use only. Please read the [DISCLAIMER](DISCLAIMER.md).
+
+## Download
+
+Grab the latest **Windows bundle** or **Android APK** from the
+[Releases page](https://github.com/Felifelps/YoutubeDownloader/releases).
+
+- **Windows**: unzip and run `YoutubeDownloader.exe`.
+- **Android**: install the `.apk` (`armeabi-v7a`, Android 5.0+); you'll need to
+  allow installing from unknown sources. Audio saves as `.m4a`; video needs an
+  arm64 `ffmpeg` binary bundled at build time (see below).
 
 ## Functionalities
 
 - Download YouTube videos by video URL
-- Download YouTube playlists by playlist URL
-- Set the output directory
+- Download YouTube playlists by playlist URL (into a folder named after the playlist)
+- Multiple URLs at once (one per line); already-downloaded files are skipped
+- Choose video or audio
+- Set the output directory (desktop)
 
 ## Technologies
 
@@ -57,7 +72,26 @@ To install this project, follow these steps:
     python main.py
     ```
 
+## Building a Windows bundle
+
+```shell
+pip install pyinstaller pillow
+flet pack main.py -D --name YoutubeDownloader --icon assets/icon.png
+```
+
+Output is a folder in `dist/YoutubeDownloader/` — zip it for distribution.
+
 ## Building an Android APK
+
+Use the helper script (`armeabi-v7a`, ~29 MB):
+
+```powershell
+.\build_apk.ps1
+```
+
+Or call `flet build` directly. It uses the dependencies in `pyproject.toml`
+(not `requirements.txt`), so `flet-desktop` and the desktop ffmpeg are left out
+of the bundle.
 
 The app can be packaged with `flet build apk`. `flet build` uses the
 dependencies in `pyproject.toml` (not `requirements.txt`), so `flet-desktop`
