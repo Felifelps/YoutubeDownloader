@@ -4,30 +4,30 @@ import flet as ft
 
 from .download_tab import download_tab
 from .settings_tab import settings_tab
+from .utils import default_download_dir, storage_get
+
+# Old builds defaulted here, which happens to be this project's own folder.
+_LEGACY_DIR = os.path.join(os.path.expanduser("~"), "YoutubeDownloader")
+
 
 def main(page: ft.Page):
     page.title = "YoutubeDownloader"
-    page.theme = ft.Theme(color_scheme_seed='red')
+    page.theme = ft.Theme(color_scheme_seed="red")
     page.auto_scroll = True
 
-    page.snack_bar = ft.SnackBar(content=ft.Text('None'))
-
-    if not page.client_storage.get('download_dir'):
-        download_dir = os.path.join(
-            os.path.expanduser('~'), 'YoutubeDownloader'
-        )
-        if not os.path.exists(download_dir):
-            os.mkdir(download_dir)
-
-        page.client_storage.set('download_dir', download_dir)
+    download_dir = storage_get(page, "download_dir")
+    if not download_dir or os.path.normpath(download_dir) == os.path.normpath(_LEGACY_DIR):
+        download_dir = default_download_dir()
+        os.makedirs(download_dir, exist_ok=True)
+        page.client_storage.set("download_dir", download_dir)
 
     page.add(
         ft.Row(
             alignment=ft.MainAxisAlignment.CENTER,
             controls=[
-                ft.Icon(ft.icons.VIDEO_LIBRARY, size=40),
-                ft.Text('YoutubeDownloader', size=40),
-            ]
+                ft.Icon(ft.Icons.VIDEO_LIBRARY, size=40),
+                ft.Text("YoutubeDownloader", size=40),
+            ],
         ),
         ft.Container(
             expand=True,
@@ -48,13 +48,12 @@ def main(page: ft.Page):
                 controls=[
                     ft.TextButton(
                         content=ft.Text(
-                            '@felifelps.dev',
+                            "@felifelps.dev",
                             text_align=ft.TextAlign.CENTER,
                         ),
                         url="https://www.instagram.com/felifelps.dev/",
                     ),
-                    
-                ]
-            )
-        )
+                ],
+            ),
+        ),
     )
