@@ -26,7 +26,7 @@ $env:PYTHONIOENCODING = "utf-8"
 $fletArgs = @(
     "build", "apk",
     "--arch", $Arch,
-    "--exclude", ".venv", ".git", ".github", ".dart_tool", "__pycache__", "build", ".claude", "dist",
+    "--exclude", ".venv", ".git", ".github", ".dart_tool", "__pycache__", "build", "dist", "release_assets", ".claude",
     "--compile-app", "--compile-packages",
     "--cleanup-app", "--cleanup-packages",
     "--deep-linking-scheme", "https",
