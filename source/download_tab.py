@@ -1,6 +1,7 @@
 import flet as ft
 
 from .control import Control
+from .env import is_android
 from .utils import default_download_dir, show_message, storage_get
 
 DEFAULT_DIR = default_download_dir()
@@ -13,6 +14,17 @@ def download_tab(page: ft.Page):
         label="Video/playlist url (one per line)",
         multiline=True,
     )
+
+    def prefill_download_url(url):
+        current = url_field.value or ""
+        if url and url not in current:
+            url_field.value = (
+                f"{current}\n{url}".strip() if current.strip() else url
+            )
+            page.update()
+
+    # Used by main.py when the app is opened from a shared link.
+    page.prefill_download_url = prefill_download_url
 
     download_type_field = ft.RadioGroup(
         value="video",
@@ -118,7 +130,17 @@ def download_tab(page: ft.Page):
         show_message(page, final_message)
 
     def open_output_folder(e):
-        Control.open_output_path(storage_get(page, "download_dir") or DEFAULT_DIR)
+        target = storage_get(page, "download_dir") or DEFAULT_DIR
+        if is_android():
+            # No reliable "open this folder" intent from Flet on Android; show
+            # the path (and try a launch as a best effort).
+            try:
+                page.launch_url(f"file://{target}")
+            except Exception:
+                pass
+            show_message(page, f"Files are saved to: {target}")
+            return
+        Control.open_output_path(target)
 
     download_button.on_click = download
     cancel_button.on_click = cancel_download

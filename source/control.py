@@ -1,3 +1,4 @@
+import glob
 import os
 import platform
 import shutil
@@ -80,6 +81,7 @@ class Control:
             "noprogress": True,
             "quiet": True,
             "no_warnings": True,
+            "overwrites": False,  # never re-download an existing file
         }
 
         if HAS_FFMPEG:
@@ -148,6 +150,22 @@ class Control:
             for entry in entries:
                 if not entry:
                     continue
+
+                # Skip anything already downloaded (same title -> any extension)
+                # so re-running a URL doesn't create duplicates.
+                title = entry.get("title")
+                if title:
+                    stem = os.path.join(
+                        output_dir, sanitize_filename(title, restricted=False)
+                    )
+                    existing = [
+                        p
+                        for p in glob.glob(glob.escape(stem) + ".*")
+                        if not p.endswith((".part", ".ytdl"))
+                    ]
+                    if existing:
+                        yield f"Already downloaded: {os.path.basename(existing[0])}"
+                        continue
 
                 target = (
                     entry.get("webpage_url")

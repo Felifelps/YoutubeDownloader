@@ -49,6 +49,20 @@ def settings_tab(page: ft.Page):
         )
     )
 
+    controls.append(ft.Divider())
+    controls.append(
+        ft.TextButton(
+            content=ft.Row(
+                tight=True,
+                controls=[
+                    ft.Icon(ft.Icons.CODE, size=18),
+                    ft.Text("github.com/Felifelps"),
+                ],
+            ),
+            url="https://github.com/Felifelps",
+        )
+    )
+
     return ft.Tab(
         tab_content=ft.Text("Settings"),
         content=ft.Container(
