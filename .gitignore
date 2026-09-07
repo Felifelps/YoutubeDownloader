@@ -3,4 +3,6 @@
 **.bat
 **.ico
 build
-**.spec
+dist
+release_assets
+*.spec
