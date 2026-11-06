@@ -25,6 +25,7 @@ Grab the latest **Windows bundle** or **Android APK** from the
 - Download YouTube playlists by playlist URL (into a folder named after the playlist)
 - Multiple URLs at once (one per line); already-downloaded files are skipped
 - Choose video or audio
+- Add cover art, artist, album and other tags to audio downloads
 - Set the output directory (desktop)
 
 ## Technologies
@@ -60,7 +61,17 @@ To install this project, follow these steps:
     source .venv/bin/activate
     ```
 
-4. Install the requirements with:
+4. Install the dependencies:
+
+    - With [uv](https://docs.astral.sh/uv/) (recommended). It installs the
+    `dev` group from `pyproject.toml`, which brings `flet-desktop` (the desktop
+    runtime) and `imageio-ffmpeg`:
+
+    ```shell
+    uv sync
+    ```
+
+    - Or with `pip` using `requirements.txt`:
 
     ```shell
     pip install -r requirements.txt
@@ -70,6 +81,7 @@ To install this project, follow these steps:
 
     ```shell
     python main.py
+    # or: uv run main.py
     ```
 
 ## Building a Windows bundle
@@ -121,7 +133,9 @@ install it (enable "install from unknown sources").
 ### 3. Notes / limitations on Android
 
 - **Audio downloads work out of the box.** They are saved as `.m4a` (no
-  transcoding to mp3, since that needs ffmpeg).
+  transcoding to mp3, since that needs ffmpeg). Without ffmpeg, the cover,
+  artist and album tags can't be written either, so the "Add cover, artist and
+  album" switch in Settings is disabled.
 - **Video downloads need ffmpeg.** YouTube serves video and audio as separate
   streams that must be merged. Ship an arm64 `ffmpeg` binary at
   `assets/ffmpeg` before building and it will be picked up automatically;
