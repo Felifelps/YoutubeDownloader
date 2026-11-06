@@ -74,7 +74,7 @@ HAS_FFMPEG = FFMPEG_DIR is not None
 
 class Control:
     @classmethod
-    def _options(cls, output_dir, is_audio):
+    def _options(cls, output_dir, is_audio, embed_metadata=True):
         options = {
             "outtmpl": os.path.join(output_dir, "%(title)s.%(ext)s"),
             "ignoreerrors": True,
@@ -86,18 +86,37 @@ class Control:
 
         if HAS_FFMPEG:
             options["ffmpeg_location"] = FFMPEG_DIR
+            postprocessors = []
+
             if is_audio:
                 options["format"] = "bestaudio/best"
-                options["postprocessors"] = [
+                postprocessors.append(
                     {
                         "key": "FFmpegExtractAudio",
                         "preferredcodec": "mp3",
                         "preferredquality": "192",
                     }
-                ]
+                )
+
+                if embed_metadata:
+                    # Ask yt-dlp for the cover, then write it together with the
+                    # title/artist/album it already knows into the audio tags.
+                    options["writethumbnail"] = True
+                    postprocessors += [
+                        {"key": "FFmpegMetadata", "add_metadata": True},
+                        # The thumbnail is only a temporary file used to embed
+                        # the cover, so let yt-dlp delete it afterwards.
+                        {
+                            "key": "EmbedThumbnail",
+                            "already_have_thumbnail": False,
+                        },
+                    ]
             else:
                 options["format"] = "bestvideo*+bestaudio/best"
                 options["merge_output_format"] = "mp4"
+
+            if postprocessors:
+                options["postprocessors"] = postprocessors
         else:
             # No ffmpeg: grab a single already-muxed stream so nothing needs
             # merging or transcoding.
@@ -108,11 +127,21 @@ class Control:
         return options
 
     @classmethod
-    def download(cls, url, output_dir, is_audio=False, playlist_subfolder=True):
+    def download(
+        cls,
+        url,
+        output_dir,
+        is_audio=False,
+        playlist_subfolder=True,
+        embed_metadata=True,
+    ):
         """Download a single video or a whole playlist.
 
         When ``playlist_subfolder`` is true, a playlist is saved into its own
         folder named after the playlist.
+
+        When ``embed_metadata`` is true (audio only), the cover, artist, album
+        and other tags yt-dlp discovers are embedded into the saved file.
 
         Yields the file name of every finished download so the caller can
         update the UI and check for cancellation between items.
@@ -145,7 +174,7 @@ class Control:
         else:
             entries = [info]
 
-        options = cls._options(output_dir, is_audio)
+        options = cls._options(output_dir, is_audio, embed_metadata)
         with YoutubeDL(options) as ydl:
             for entry in entries:
                 if not entry:

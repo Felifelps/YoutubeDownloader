@@ -1,5 +1,6 @@
 import flet as ft
 
+from .control import HAS_FFMPEG
 from .env import is_android
 from .utils import default_download_dir, show_message, storage_get
 
@@ -48,6 +49,26 @@ def settings_tab(page: ft.Page):
             on_change=set_playlist_subfolder,
         )
     )
+
+    def set_embed_song_info(e):
+        page.client_storage.set("embed_song_info", e.control.value)
+
+    controls.append(
+        ft.Switch(
+            label="Add cover, artist and album to downloaded audio",
+            value=bool(storage_get(page, "embed_song_info", True)),
+            on_change=set_embed_song_info,
+            disabled=not HAS_FFMPEG,
+        )
+    )
+    if not HAS_FFMPEG:
+        controls.append(
+            ft.Text(
+                "Needs ffmpeg to write the tags, which isn't available here.",
+                size=12,
+                italic=True,
+            )
+        )
 
     controls.append(ft.Divider())
     controls.append(

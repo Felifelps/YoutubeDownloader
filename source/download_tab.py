@@ -73,6 +73,7 @@ def download_tab(page: ft.Page):
 
         download_dir = storage_get(page, "download_dir") or DEFAULT_DIR
         playlist_subfolder = storage_get(page, "playlist_subfolder", True)
+        embed_metadata = storage_get(page, "embed_song_info", True)
 
         download_button.text = "Downloading..."
         download_button.disabled = True
@@ -101,6 +102,7 @@ def download_tab(page: ft.Page):
                     download_dir,
                     download_type_field.value == "audio",
                     playlist_subfolder,
+                    embed_metadata,
                 ):
                     if is_cancelled():
                         final_message = "Download cancelled by user"
