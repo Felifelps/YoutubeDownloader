@@ -1,8 +1,9 @@
 # Configuration for `flet build` (Android / iOS / desktop / web bundles).
 #
-# For local desktop development keep using `pip install -r requirements.txt`
-# (that file also pulls in flet-desktop and a bundled ffmpeg, which are not
-# used on mobile). `flet build` reads the dependency list below instead.
+# `flet build` reads only [project.dependencies] below — the runtime that ships
+# inside the bundle — so the desktop-only pieces live in the `dev` dependency
+# group instead. For local development install everything with `uv sync`
+# (`pip install -r requirements.txt` does the same without uv).
 
 [project]
 name = "youtubedownloader"
@@ -15,6 +16,16 @@ dependencies = [
     "flet==0.28.3",
     "yt-dlp",
 ]
+
+[dependency-groups]
+dev = [
+    # `desktop` installs the right desktop runtime per OS (flet-desktop on
+    # Windows/macOS, flet-desktop-light on Linux); `cli` provides `flet build`.
+    "flet[desktop,cli]==0.28.3",
+    # Bundled ffmpeg: needed to convert audio to mp3 and write the song tags.
+    "imageio-ffmpeg",
+]
+
 
 [tool.flet]
 org = "com.felifelps"
