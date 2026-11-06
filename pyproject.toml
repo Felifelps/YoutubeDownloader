@@ -15,6 +15,9 @@ authors = [{ name = "Felifelps", email = "felifelps.dev@gmail.com" }]
 dependencies = [
     "flet==0.28.3",
     "yt-dlp",
+    # Pure-python tag writer: embeds cover/artist/album without ffmpeg,
+    # which is what allows audio metadata to work on Android.
+    "mutagen",
 ]
 
 [dependency-groups]
@@ -22,7 +25,8 @@ dev = [
     # `desktop` installs the right desktop runtime per OS (flet-desktop on
     # Windows/macOS, flet-desktop-light on Linux); `cli` provides `flet build`.
     "flet[desktop,cli]==0.28.3",
-    # Bundled ffmpeg: needed to convert audio to mp3 and write the song tags.
+    # Bundled ffmpeg: needed to convert audio to mp3 (tag writing no longer
+    # needs it).
     "imageio-ffmpeg",
 ]
 

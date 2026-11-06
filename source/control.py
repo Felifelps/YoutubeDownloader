@@ -7,6 +7,7 @@ import subprocess
 from yt_dlp import YoutubeDL
 from yt_dlp.utils import sanitize_filename
 
+from . import metadata
 from .env import is_android
 
 try:
@@ -119,7 +120,8 @@ class Control:
                 options["postprocessors"] = postprocessors
         else:
             # No ffmpeg: grab a single already-muxed stream so nothing needs
-            # merging or transcoding.
+            # merging or transcoding. The cover/tags are written later with
+            # mutagen (see Control.download), which doesn't need ffmpeg.
             options["format"] = (
                 "bestaudio[ext=m4a]/bestaudio" if is_audio else "best"
             )
@@ -210,6 +212,13 @@ class Control:
                 filename = ydl.prepare_filename(result)
                 if is_audio and HAS_FFMPEG:
                     filename = os.path.splitext(filename)[0] + ".mp3"
+                elif is_audio and embed_metadata:
+                    # No ffmpeg (Android): write the cover and tags with
+                    # mutagen instead of the ffmpeg post-processors.
+                    try:
+                        metadata.write_tags(filename, result)
+                    except Exception:
+                        pass
 
                 yield os.path.basename(filename)
 

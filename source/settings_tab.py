@@ -58,13 +58,13 @@ def settings_tab(page: ft.Page):
             label="Add cover, artist and album to downloaded audio",
             value=bool(storage_get(page, "embed_song_info", True)),
             on_change=set_embed_song_info,
-            disabled=not HAS_FFMPEG,
         )
     )
     if not HAS_FFMPEG:
         controls.append(
             ft.Text(
-                "Needs ffmpeg to write the tags, which isn't available here.",
+                "Audio is kept as .m4a here (converting to mp3 needs ffmpeg), "
+                "but the cover and tags are still added.",
                 size=12,
                 italic=True,
             )

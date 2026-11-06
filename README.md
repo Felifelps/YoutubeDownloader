@@ -33,6 +33,7 @@ Grab the latest **Windows bundle** or **Android APK** from the
 - Python
 - Flet
 - yt-dlp
+- mutagen (writes audio tags/cover without ffmpeg)
 - ffmpeg (bundled on desktop via `imageio-ffmpeg`)
 
 ## Installation
@@ -133,9 +134,10 @@ install it (enable "install from unknown sources").
 ### 3. Notes / limitations on Android
 
 - **Audio downloads work out of the box.** They are saved as `.m4a` (no
-  transcoding to mp3, since that needs ffmpeg). Without ffmpeg, the cover,
-  artist and album tags can't be written either, so the "Add cover, artist and
-  album" switch in Settings is disabled.
+  transcoding to mp3, since that needs ffmpeg). The cover, artist, album and
+  other tags are still written: instead of the ffmpeg post-processors, the app
+  uses `mutagen`, so the "Add cover, artist and album" switch in Settings
+  works on Android as well.
 - **Video downloads need ffmpeg.** YouTube serves video and audio as separate
   streams that must be merged. Ship an arm64 `ffmpeg` binary at
   `assets/ffmpeg` before building and it will be picked up automatically;
